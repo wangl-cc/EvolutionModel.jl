@@ -6,18 +6,18 @@ plotlyjs()
 function mutfunc(b, d, c, i)
     b = vcat(b, b[i])
     d = vcat(d, d[i])
-    c = EvolutionModel.mutcompmat(c, i)
+    c = mutcompmat(c, i)
     return b, d, c
 end
 
-m = CoevoCompModel([100], [0.6], [0.1], ones(1,1)*0.005, 0.05, mutfunc)
+m = CoevoCompModel([100], [0.6], [0.1], ones(1,1), 0.05, 100., mutfunc)
 
 
-p, t = gillespie(m, 100)
+ps = gillespie(m, 100)
 
-plt = plot(t, [get(i, 1, 0) for i in p], legend=false)
-for j in 2:length(p[end])
-    plot!(plt, t, [get(i, j, 0) for i in p], )
+plt = plot(legend=false)
+for p in ps
+    plot!(p.history)
 end
 
 i = rand(Int)
