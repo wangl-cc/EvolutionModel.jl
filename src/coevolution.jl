@@ -1,5 +1,3 @@
-using Distributions
-
 struct CoevoCompModel{I <: Integer,R <: Real,F <: Function} <: AbstractModel
     populations::Vector{I}
     birthrates::Vector{R}
@@ -56,16 +54,4 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
         sum(populations)<=0 && break
     end
     return data_p, data_t
-end
-
-function mutcompmat(compmat::AbstractMatrix{R}, i::Integer)where R <: Real
-    l = size(compmat, 1)
-    newmat = zeros(R, l + 1, l + 1)
-    newmat[1:l, 1:l] = compmat
-    for k in 1:l
-        newmat[l + 1, k] = rand(TruncatedNormal(compmat[i, k], 1, 0, Inf))
-        newmat[k, l + 1] = rand(TruncatedNormal(compmat[k, i], 1, 0, Inf))
-    end
-    newmat[l + 1, l + 1] = rand(TruncatedNormal(compmat[i, i], 1, 0, Inf))
-    return newmat
 end
