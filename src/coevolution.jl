@@ -6,6 +6,7 @@ struct CoevoCompModel{I <: Integer,R <: Real,F <: Function} <: AbstractModel
     deathrates::Vector{R}
     compmat::Matrix{R}
     mutrate::R
+    M::R
     mutfunc::F
 end
 
@@ -17,13 +18,14 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
     compmat = deepcopy(m.compmat)
     mutrate = m.mutrate
     mutfunc = m.mutfunc
+    repM = 1/m.M
     data_p = Vector{I}[deepcopy(populations)]
     data_t = R[t]
     while t <= T
         birth_nomut = birthrates .* populations * (1 - mutrate)
         birth_mut = birthrates .* populations * mutrate
         death = deathrates .* populations
-        comp  = reshape(populations, (1, length(populations))) .* compmat .* populations
+        comp  = reshape(populations, (1, length(populations))) ./ compmat .* populations .* repM
         τ, (index, i) = findreaction(birth_nomut, birth_mut, death, comp)
         # τ == Inf && println(birth_nomut, birth_mut, death, comp); break
         t += τ
@@ -51,6 +53,7 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
         end
         push!(data_p, deepcopy(populations))
         push!(data_t, t)
+        sum(populations)<=0 && break
     end
     return data_p, data_t
 end
