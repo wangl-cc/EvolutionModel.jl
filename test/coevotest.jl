@@ -10,7 +10,7 @@ function mutfunc(b, d, c, i)
     return b, d, c
 end
 
-m = CoevoCompModel([100], [0.6], [0.1], ones(1,1)*0.005, 0.05, mutfunc)
+m = CoevoCompModel([100], [0.6], [0.1], ones(1,1), 0.05, 500., mutfunc)
 
 
 p, t = gillespie(m, 100)
