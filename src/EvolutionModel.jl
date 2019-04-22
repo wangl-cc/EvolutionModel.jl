@@ -1,8 +1,8 @@
 module EvolutionModel
 
-export gillespie, CoevoCompModel
-
 include("gillespie.jl")
+
+include("singlepopulation.jl")
 
 include("coevolution.jl")
 

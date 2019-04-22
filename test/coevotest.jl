@@ -1,8 +1,4 @@
 using Distributions
-using EvolutionModel
-using Plots
-
-plotlyjs()
 
 function mutcompmat(compmat::AbstractMatrix{R}, i::Integer, var::Real)where R <: Real
     l = size(compmat, 1)
@@ -25,13 +21,4 @@ end
 
 m = CoevoCompModel([100], [0.6], [0.1], ones(1,1), 0.05, 100., mutfunc)
 
-
 ps = gillespie(m, 100)
-
-plt = plot(legend=false)
-for p in ps
-    plot!(p.history)
-end
-
-i = rand(Int)
-png(plt, joinpath(@__DIR__, "plt-$i.png"))

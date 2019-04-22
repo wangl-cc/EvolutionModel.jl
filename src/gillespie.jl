@@ -1,3 +1,5 @@
+export gillespie
+
 abstract type AbstractModel end
 
 function findreaction(reactions::AbstractArray{R}...)where {R}

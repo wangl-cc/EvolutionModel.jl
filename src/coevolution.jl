@@ -1,9 +1,11 @@
-mutable struct Population{I<:Integer, R<:Real}
+export CoevoCompModel
+
+mutable struct Population{R<:Real, I<:Integer}
     n::I
-    history::Vector{Tuple{I, R}}
+    history::Vector{Tuple{R, I}}
 end
 
-Population(n::Integer, t::Real) = Population(n, [(n, t)])
+Population(t::Real, n::Integer) = Population(n, [(t, n)])
 
 struct CoevoCompModel{I <: Integer,R <: Real,F <: Function} <: AbstractModel
     populations::Vector{I}
@@ -15,9 +17,16 @@ struct CoevoCompModel{I <: Integer,R <: Real,F <: Function} <: AbstractModel
     mutfunc::F
 end
 
+CoevoCompModel(p::Vector{<:Real},
+               b::Vector{<:Real},
+               d::Vector{<:Real},
+               c::Matrix{<:Real},
+               mutrate::Real, M::Real,
+               f::Function) = CoevoCompModel(p, promote(b, d, c, mutrate, M)..., f)
+
 function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: Real,F <: Function}
     t = R(0.0)
-    populations = [Population(i, t) for i in m.populations]
+    populations = [Population(t, i) for i in m.populations]
     birthrates = deepcopy(m.birthrates)
     deathrates = deepcopy(m.deathrates)
     compmat = deepcopy(m.compmat)
@@ -37,15 +46,15 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
         t += τ
         if index == 1
             populations[i].n += 1
-            push!(populations[i].history, (populations[i].n, t))
+            push!(populations[i].history, (t, populations[i].n))
         elseif index == 2
-            newpop = Population(1, t)
+            newpop = Population(t, 1)
             populations = vcat(populations, newpop)
             populations_history = vcat(populations_history, newpop)
             birthrates, deathrates, compmat = mutfunc(birthrates, deathrates, compmat, i)
         elseif index == 3
             populations[i].n -= 1
-            push!(populations[i].history, (populations[i].n, t))
+            push!(populations[i].history, (t, populations[i].n))
             if populations[i] == 0
                 deleteat!(populations, i)
                 deleteat!(birthrates, i)
@@ -54,7 +63,7 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
             end
         elseif index == 4
             populations[i[1]].n -= 1
-            push!(populations[i[1]].history, (populations[i[1]].n, t))
+            push!(populations[i[1]].history, (t, populations[i[1]].n))
             if populations[i[1]] == 0
                 deleteat!(populations, i)
                 deleteat!(birthrates, i)
