@@ -4,7 +4,7 @@ function mutcompmat(compmat::AbstractMatrix{R}, i::Integer, var::Real)where R <:
     l = size(compmat, 1)
     newmat = zeros(R, l + 1, l + 1)
     newmat[1:l, 1:l] = compmat
-    for k in 1:l
+    @inbounds for k in 1:l
         newmat[l + 1, k] = rand(TruncatedNormal(compmat[i, k], var, 0, Inf))
         newmat[k, l + 1] = rand(TruncatedNormal(compmat[k, i], var, 0, Inf))
     end

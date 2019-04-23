@@ -19,7 +19,7 @@ minv, maxv = confint(OneSampleTTest(v))
 
 expect = 10*exp((0.5-0.1)*T)
 
-println(minv < expect < maxv)
+@test minv < expect < maxv
 
 # LogistModel Tests
 
@@ -35,7 +35,7 @@ minv, maxv = confint(OneSampleTTest(v))
 
 expect = K*n/(n+(K-n)*exp(-(b-d)T))
 
-println(minv < expect < maxv)
+@test minv < expect < maxv
 
 m = LogistModel(n, Float32(b), d, K=K)
 
@@ -45,4 +45,4 @@ minv, maxv = confint(OneSampleTTest(v))
 
 expect = K*n/(n+(K-n)*exp(-(b-d)T))
 
-println(minv < expect < maxv)
+@test minv < expect < maxv

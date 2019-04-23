@@ -16,7 +16,8 @@ function gillespie(m::ExpModel{I, R}, T::Real)where {I <: Integer,R <: Real}
     history = [(t, n)]
     while t <= T
         reactions = [n*b, n*d]
-        τ, (_, i) = findreaction(reactions)
+        τ, _, i = findreaction(reactions)
+        i = i[1]
         t += τ
         if i == 1
             n += 1
@@ -47,7 +48,8 @@ function gillespie(m::LogistModel{I, R}, T::Integer)where {I <: Integer, R <: Re
     history = [(t, n)]
     while t <= T
         reactions = [n*b, n*d, n*c*n]
-        τ, (_, i) = findreaction(reactions)
+        τ, _, i = findreaction(reactions)
+        i = i[1]
         t += τ
         if i == 1
             n += 1
