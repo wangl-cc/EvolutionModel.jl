@@ -17,12 +17,21 @@ struct CoevoCompModel{I <: Integer,R <: Real,F <: Function} <: AbstractModel
     mutfunc::F
 end
 
-CoevoCompModel(p::Vector{<:Real},
-               b::Vector{<:Real},
-               d::Vector{<:Real},
-               c::Matrix{<:Real},
-               mutrate::Real, M::Real,
-               f::Function) = CoevoCompModel(p, promote(b, d, c, mutrate, M)..., f)
+function CoevoCompModel(p::Vector{<:Integer},
+               b::Vector{RA},
+               d::Vector{RB},
+               c::Matrix{RC},
+               mutrate::RD,
+               M::RE,
+               f::Function)where {RA <: Real, RB <: Real, RC <: Real, RD <: Real, RE <: Real}
+    T = promote_type(RA, RB, RC, RD, RE)
+    b = T.(b)
+    d = T.(d)
+    c = T.(c)
+    mutrate = T(mutrate)
+    M = T(M)
+    return CoevoCompModel(p, b, d, c, mutrate, M, f)
+end
 
 function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: Real,F <: Function}
     t = R(0.0)
