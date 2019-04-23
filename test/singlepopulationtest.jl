@@ -17,7 +17,7 @@ v = [gillespie(m, T)[end][2] for _ in 1:repeatimes]
 
 minv, maxv = confint(OneSampleTTest(v))
 
-expect = 10*exp((0.5-0.1)*T)
+expect = n*exp((b-d)*T)
 
 @test minv < expect < maxv
 
