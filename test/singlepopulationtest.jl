@@ -7,13 +7,13 @@ b = 0.5
 d = 0.1
 T = 10
 
-repeatimes = 1000
+repeatimes = 100
 
 # ExpModel Tests
 
 m = ExpModel(n, b, Float32(d))
 
-v = [gillespie(m, T)[end][2] for _ in 1:repeatimes]
+v = [gillespie(m, T).n for _ in 1:repeatimes]
 
 # minv, maxv = confint(OneSampleTTest(v))
 #
@@ -29,7 +29,7 @@ K = (b - d)/c
 
 m = LogistModel(n, Float32(b), d, c)
 
-v = [gillespie(m, T)[end][2] for _ in 1:repeatimes]
+v = [gillespie(m, T).n for _ in 1:repeatimes]
 
 # minv, maxv = confint(OneSampleTTest(v))
 
@@ -39,7 +39,7 @@ v = [gillespie(m, T)[end][2] for _ in 1:repeatimes]
 
 m = LogistModel(n, Float32(b), d, K=K)
 
-v = [gillespie(m, T)[end][2] for _ in 1:repeatimes]
+v = [gillespie(m, T).n for _ in 1:repeatimes]
 
 # minv, maxv = confint(OneSampleTTest(v))
 
