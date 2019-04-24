@@ -30,8 +30,8 @@ function findreaction(reactionrates::AbstractArray{R}...)where R<:Real
     sum_rs = [sum(i) for i in reactionrates]
     sum_all = sum(sum_rs)
     τ = -log(rand())/sum_all
-    i = randchoice(sum_rs)
-    index = randchoice(reactionrates[i[1]])
+    i = randchoice(sum_rs)[1]
+    index = randchoice(reactionrates[i])
     return τ, i, index
 end
 

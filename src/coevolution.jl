@@ -44,7 +44,6 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
         death = deathrates .* populations_num
         comp  = reshape(populations_num, (1, length(populations_num))) ./ compmat .* populations_num .* repM
         τ, i, index = findreaction(birth_nomut, birth_mut, death, comp)
-        i = i[1]
         index = index[1]
         t += τ
         if i == 1
