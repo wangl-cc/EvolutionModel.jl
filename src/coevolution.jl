@@ -58,7 +58,7 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
         elseif i in (3, 4)
             populations[index].n -= 1
             push!(populations[index].history, (t, populations[index].n))
-            if populations[index] == 0
+            if populations[index].n == 0
                 deleteat!(populations, index)
                 deleteat!(birthrates, index)
                 deleteat!(deathrates, index)
