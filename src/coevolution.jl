@@ -1,12 +1,5 @@
 export CoevoCompModel
 
-mutable struct Population{R<:Real, I<:Integer}
-    n::I
-    history::Vector{Tuple{R, I}}
-end
-
-Population(t::Real, n::Integer) = Population(n, [(t, n)])
-
 struct CoevoCompModel{I <: Integer,R <: Real,F <: Function} <: AbstractModel
     populations::Vector{I}
     birthrates::Vector{R}
