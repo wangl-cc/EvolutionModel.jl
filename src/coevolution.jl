@@ -29,22 +29,22 @@ end
 function gillespie(m::CoevoCompModel{I,R,F}, T::Real)where {I <: Integer,R <: Real,F <: Function}
     t = zero(R)
     populations = Population.(t, m.populations)
-    birthrates::Vector{R} = deepcopy(m.birthrates)
-    deathrates::Vector{R} = deepcopy(m.deathrates)
-    compmat::Matrix{R} = deepcopy(m.compmat)
+    birthrates = copy(m.birthrates)
+    deathrates = copy(m.deathrates)
+    compmat = copy(m.compmat)
     populations_history = copy(populations)
     mutrate::R = m.mutrate
+    nomutrate = 1 - mutrate
     mutfunc::F = m.mutfunc
     repM::R = 1/m.M
     while t <= T
-        populations_num::Vector{I} = getproperty.(populations, :n)
+        populations_num = [getfield(p, :n) for p in populations]
         sum(populations_num)<=0 && break
-        birth_nomut = birthrates .* populations_num * (1 - mutrate)
-        birth_mut = birthrates .* populations_num * mutrate
+        birth_nomut = birthrates .* populations_num .* nomutrate
+        birth_mut = birthrates .* populations_num .* mutrate
         death = deathrates .* populations_num
         comp  = reshape(populations_num, (1, length(populations_num))) ./ compmat .* populations_num .* repM
         τ, i, index = findreaction(birth_nomut, birth_mut, death, comp)
-        index = index[1]
         t += τ
         if i == 1
             populations[index].n += 1

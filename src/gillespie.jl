@@ -31,7 +31,7 @@ function findreaction(reactionrates::AbstractArray{R}...)where R<:Real
     sum_rs = [sum(i) for i in reactionrates]
     sum_all = sum(sum_rs)
     τ = -log(rand())/sum_all
-    i = randchoice(sum_rs)[1]
+    i = randchoice(sum_rs)
     index = randchoice(reactionrates[i])
     return τ, i, index
 end
@@ -55,8 +55,8 @@ sample(wv::AbstractVector) = sample(Random.GLOBAL_RNG, wv)
 sample(rng::AbstractRNG, a::AbstractVector, wv::AbstractVector) = a[sample(rng, wv)]
 sample(a::AbstractArray, wv::AbstractVector) = sample(Random.GLOBAL_RNG, a, wv)
 
-function randchoice(w::AbstractArray{R})where R<:Real
+@inline function randchoice(w::AbstractArray{R})where R<:Real
     indices = vec(CartesianIndices(w))
     wv = vec(w)
-    sample(indices, wv)
+    sample(indices, wv)[1]
 end
