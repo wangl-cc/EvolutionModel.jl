@@ -26,18 +26,18 @@ function CoevoCompModel(p::Vector{<:Integer},
     return CoevoCompModel(p, b, d, c, mutrate, M, f)
 end
 
-function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: Real,F <: Function}
-    t = R(0.0)
-    populations = [Population(t, i) for i in m.populations]
-    birthrates = deepcopy(m.birthrates)
-    deathrates = deepcopy(m.deathrates)
-    compmat = deepcopy(m.compmat)
-    populations_history = [populations...]
-    mutrate = m.mutrate
-    mutfunc = m.mutfunc
-    repM = 1/m.M
+function gillespie(m::CoevoCompModel{I,R,F}, T::Real)where {I <: Integer,R <: Real,F <: Function}
+    t = zero(R)
+    populations = Population.(t, m.populations)
+    birthrates::Vector{R} = deepcopy(m.birthrates)
+    deathrates::Vector{R} = deepcopy(m.deathrates)
+    compmat::Matrix{R} = deepcopy(m.compmat)
+    populations_history = copy(populations)
+    mutrate::R = m.mutrate
+    mutfunc::F = m.mutfunc
+    repM::R = 1/m.M
     while t <= T
-        populations_num = [i.n for i in populations]
+        populations_num::Vector{I} = getproperty.(populations, :n)
         sum(populations_num)<=0 && break
         birth_nomut = birthrates .* populations_num * (1 - mutrate)
         birth_mut = birthrates .* populations_num * mutrate
@@ -51,8 +51,8 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Number)where {I <: Integer,R <: 
             push!(populations[index].history, (t, populations[index].n))
         elseif i == 2
             newpop = Population(t, 1)
-            populations = vcat(populations, newpop)
-            populations_history = vcat(populations_history, newpop)
+            push!(populations, newpop)
+            push!(populations_history, newpop)
             birthrates, deathrates, compmat = mutfunc(birthrates, deathrates, compmat, index)
         elseif i in (3, 4)
             populations[index].n -= 1

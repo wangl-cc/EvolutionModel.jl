@@ -5,9 +5,10 @@ abstract type AbstractModel end
 mutable struct Population{R<:Real, I<:Integer}
     n::I
     history::Vector{Tuple{R, I}}
+    function Population(t::R, n::I)where {R<:Real, I<:Integer}
+        return new{R, I}(n, [(t, n)])
+    end
 end
-
-Population(t::Real, n::Integer) = Population(n, [(t, n)])
 
 # function findreaction(reactions::AbstractArray{R}...)where {R}
 #     min_τ = Inf
