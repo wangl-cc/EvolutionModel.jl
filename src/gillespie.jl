@@ -30,7 +30,7 @@ function gillespie(m::AbstractModel, T::Number) end
 function findreaction(reactionrates::AbstractArray{R}...)where R<:Real
     sum_rs = [sum(i) for i in reactionrates]
     sum_all = sum(sum_rs)
-    τ = -log(rand())/sum_all
+    τ = -log(rand(R))/sum_all
     i = randchoice(sum_rs)
     index = randchoice(reactionrates[i])
     return τ, i, index
@@ -39,6 +39,8 @@ end
 using Random
 
 # Copy from pkg StatsBase
+# Link: https://github.com/JuliaStats/StatsBase.jl/blob/master/src/sampling.jl#L413
+# [MIT License](https://github.com/JuliaStats/StatsBase.jl/blob/master/LICENSE.md)
 function sample(rng::AbstractRNG, wv::AbstractVector)
     t = rand(rng) * sum(wv)
     n = length(wv)
