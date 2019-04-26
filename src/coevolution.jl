@@ -33,10 +33,10 @@ function gillespie(m::CoevoCompModel{I,R,F}, T::Real)where {I <: Integer,R <: Re
     deathrates = copy(m.deathrates)
     compmat = copy(m.compmat)
     populations_history = copy(populations)
-    mutrate::R = m.mutrate
+    mutrate = m.mutrate
     nomutrate = 1 - mutrate
-    mutfunc::F = m.mutfunc
-    repM::R = 1/m.M
+    mutfunc = m.mutfunc
+    repM = 1/m.M
     while t <= T
         populations_num = [getfield(p, :n) for p in populations]
         sum(populations_num)<=0 && break
