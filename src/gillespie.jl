@@ -1,36 +1,44 @@
-export gillespie
+export gillespie, Population, AbstractModel
 
+"""
+    AbstractModel
+
+Supertype of all model.
+"""
 abstract type AbstractModel end
 
-mutable struct Population{R<:Real, I<:Integer}
+"""
+    Population{R<:Real, I<:Integer}
+"""
+mutable struct Population{R <: Real,I <: Integer}
+    "current population size"
     n::I
-    history::Vector{Tuple{R, I}}
-    function Population(t::R, n::I)where {R<:Real, I<:Integer}
-        return new{R, I}(n, [(t, n)])
+    "population change history"
+    history::Vector{Tuple{R,I}}
+    function Population(t::R, n::I)where {R <: Real,I <: Integer}
+        return new{R,I}(n, [(t, n)])
     end
 end
 
-# function findreaction(reactions::AbstractArray{R}...)where {R}
-#     min_τ = Inf
-#     indexof_min_τ = (0, 0)
-#     for i in eachindex(reactions)
-#         reaction = reactions[i]
-#         τs = - log.(rand(R, size(reaction))) ./ reaction
-#         τ, index = findmin(τs)
-#         if τ <= min_τ
-#             min_τ = τ
-#             indexof_min_τ = (i, index)
-#         end
-#     end
-#     return min_τ, indexof_min_τ
-# end
+"""
+    gillespie(m::AbstractModel,T::Real)
 
-function gillespie(m::AbstractModel, T::Number) end
+A uniform interface to sumulate model `m` by gillespie algorithm.
+"""
+function gillespie(m::AbstractModel, T::Real)
+    modeltype = typeof(m)
+    println("There is no method to sumulate ", modeltype, "!")
+end
 
-function findreaction(reactionrates::AbstractArray{R}...)where R<:Real
+"""
+    findreaction(reactionrates::AbstractArray{R}...)where R<:Real
+
+Calculate the reaction time `τ` and randomly choose an reaction from reactions with weights `reactionrates`.
+"""
+function findreaction(reactionrates::AbstractArray{R}...)where R <: Real
     sum_rs = [sum(i) for i in reactionrates]
     sum_all = sum(sum_rs)
-    τ = -log(rand(R))/sum_all
+    τ = -log(rand(R)) / sum_all
     i = randchoice(sum_rs)
     index = randchoice(reactionrates[i])
     return τ, i, index
@@ -57,7 +65,7 @@ sample(wv::AbstractVector) = sample(Random.GLOBAL_RNG, wv)
 sample(rng::AbstractRNG, a::AbstractVector, wv::AbstractVector) = a[sample(rng, wv)]
 sample(a::AbstractArray, wv::AbstractVector) = sample(Random.GLOBAL_RNG, a, wv)
 
-@inline function randchoice(w::AbstractArray{R})where R<:Real
+@inline function randchoice(w::AbstractArray{R})where R <: Real
     indices = vec(CartesianIndices(w))
     wv = vec(w)
     sample(indices, wv)[1]
