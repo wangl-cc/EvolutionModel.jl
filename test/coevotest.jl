@@ -27,8 +27,8 @@ ps = gillespie(model, 10)
 
 # CoevoCompModel Test
 
-const X_σ = 1.0
-const Y_σ = 0.3
+const X_σ = 0.1
+const Y_σ = 0.03
 
 function X_mutfunc(bX, dX, g, payoff, i)
     push!(bX, bX[i])
@@ -58,9 +58,9 @@ payoff = ones(1, 1)
 M = 1/0.00005
 p = 0.005
 m = 1.
-X_mutrate = 0.0001
-Y_mutrate = 0.001
+X_mutrate = 0.001
+Y_mutrate = 0.01
 
 model = CoevoPrPdModel(X, Y, bX, dX, dY, g, k ,K, payoff, M, p, m, X_mutrate, Y_mutrate, X_mutfunc, Y_mutfunc)
 
-X, Y, g, k = gillespie(model, 100)
+X, Y, g, k = gillespie(model, 500)
