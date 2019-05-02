@@ -15,16 +15,16 @@ function gillespie(m::ExpModel{I, R}, T::Real)where {I <: Integer,R <: Real}
     p = Population(t, m.n)
     while t <= T
         n = p.n
+        n <= 0 && break
         reactions = [n*b, n*d]
-        τ, _, i = findreaction(reactions)
+        τ, _, i = choosereaction(reactions)
         i = i[1]
         t += τ
         if i == 1
-            p.n += 1
+            birth!(p, t)
         elseif i == 2
-            p.n -= 1
+            death!(p, t)
         end
-        push!(p.history, (t, n))
     end
     return p
 end
@@ -47,16 +47,15 @@ function gillespie(m::LogistModel{I, R}, T::Integer)where {I <: Integer, R <: Re
     p = Population(t, m.n)
     while t <= T
         n = p.n
+        n <= 0 && break
         reactions = [n*b, n*d, n*c*n]
-        τ, _, i = findreaction(reactions)
+        τ, _, i = choosereaction(reactions)
         i = i[1]
         t += τ
         if i == 1
-            p.n += 1
-        elseif i == 2
-            p.n -= 1
-        elseif i == 3
-            p.n -= 1
+            birth!(p, t)
+        elseif i in (2, 3)
+            death!(p, t)
         end
         push!(p.history, (t, n))
     end

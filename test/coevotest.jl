@@ -2,22 +2,22 @@ using Distributions
 
 # CoevoCompModel Test
 
-function mutcompmat(compmat::AbstractMatrix{R}, i::Integer, σ::Real)where R <: Real
-    l = size(compmat, 1)
-    newmat = zeros(R, l + 1, l + 1)
-    newmat[1:l, 1:l] = compmat
+function mutpayoff(payoff::AbstractMatrix{R}, i::Integer, σ::Real)where R <: Real
+    l = size(payoff, 1)
+    newpayoff = zeros(R, l + 1, l + 1)
+    newpayoff[1:l, 1:l] = payoff
     @simd for k in 1:l
-        @inbounds newmat[l + 1, k] = rand(TruncatedNormal(compmat[i, k], σ, 0, Inf))
-        @inbounds newmat[k, l + 1] = rand(TruncatedNormal(compmat[k, i], σ, 0, Inf))
+        @inbounds newpayoff[l + 1, k] = rand(TruncatedNormal(payoff[i, k], σ, 0, Inf))
+        @inbounds newpayoff[k, l + 1] = rand(TruncatedNormal(payoff[k, i], σ, 0, Inf))
     end
-    newmat[l + 1, l + 1] = rand(TruncatedNormal(compmat[i, i], σ, 0, Inf))
-    return newmat
+    newpayoff[l + 1, l + 1] = rand(TruncatedNormal(payoff[i, i], σ, 0, Inf))
+    return newpayoff
 end
 
 @inline function mutfunc(b, d, c, i)
-    b = push!(b, b[i])
-    d = push!(d, d[i])
-    c = mutcompmat(c, i, 0.01)
+    push!(b, b[i])
+    push!(d, d[i])
+    c = mutpayoff(c, i, 0.01)
     return b, d, c
 end
 

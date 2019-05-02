@@ -21,22 +21,31 @@ function Population(t::R, n::I)where {R <: Real,I <: Integer}
     return Population{R,I}(n, [(t, n)])
 end
 
+function birth!(p::Population, t::Real)
+    p.n += 1
+    push!(p.history, (t, p.n))
+end
+
+function death!(p::Population, t::Real)
+    p.n -= 1
+    push!(p.history, (t, p.n))
+end
+
 """
     gillespie(m::AbstractModel,T::Real)
 
 A uniform interface to sumulate model `m` by gillespie algorithm.
 """
 function gillespie(m::AbstractModel, T::Real)
-    modeltype = typeof(m)
-    println("There is no method to sumulate", modeltype, "!")
+    println("There is no method to sumulate ", typeof(m), "!")
 end
 
 """
-    findreaction(reactionrates::AbstractArray{R}...)whereR<:Real
+    choosereaction(reactionrates::AbstractArray{R}...)where R<:Real
 
 Calculate the reaction time `τ` and randomly choose an reaction from reactions with weights `reactionrates`.
 """
-function findreaction(reactionrates::AbstractArray{R}...)where R <: Real
+function choosereaction(reactionrates::AbstractArray{R}...)where R <: Real
     sum_rs = [sum(i) for i in reactionrates]
     sum_all = sum(sum_rs)
     τ = -log(rand(R)) / sum_all
