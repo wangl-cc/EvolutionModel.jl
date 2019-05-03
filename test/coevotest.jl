@@ -14,53 +14,54 @@ function mutpayoff(payoff::AbstractMatrix{R}, i::Integer, σ::Real)where R <: Re
     return newpayoff
 end
 
-@inline function mutfunc(b, d, c, i)
-    push!(b, b[i])
-    push!(d, d[i])
+@inline function mutfunc(g::Vector, c::Matrix, i::Integer)
+    push!(g, g[i])
     c = mutpayoff(c, i, 0.01)
-    return b, d, c
+    return g, c
 end
 
-model = CoevoCompModel([100], [0.6], [0.1], ones(1,1), 0.05, 100, mutfunc)
+model = CoevoCompModel([100], 1, 0.1, [1], ones(1,1), 100, 0.05, mutfunc)
 
-ps = gillespie(model, 10)
+ps, g = gillespie(model, 10)
 
 # CoevoCompModel Test
 
 const X_σ = 0.1
 const Y_σ = 0.03
 
-function X_mutfunc(bX, dX, g, payoff, i)
-    push!(bX, bX[i])
-    push!(dX, dX[i])
+function X_mutfunc(g, payoff, i)
     push!(g, rand(TruncatedNormal(g[i], X_σ, 0.0, 1.0)))
     l = size(payoff, 1)
     payoff = ones(l+1, l+1)
-    return bX, dX, g, payoff
+    return g, payoff
 end
 
-function Y_mutfunc(dY, k, i)
-    push!(dY, dY[i])
+function Y_mutfunc(k, i)
     k = push!(k, rand(TruncatedNormal(k[i], Y_σ, 0.0, 0.3)))
-    return dY, k
+    return k
 end
 
+begin
+    X = [1000]
+    Y = [100]
+    bX = 1
+    dX = 0.1
+    dY = 0.5
+    g = [1.0]
+    k = [0.3]
+    K = 0.3
+    m = 1.
+    payoff = ones(1, 1)
+    M = 1/0.00005
+    p = 0.005
+    X_mutrate = 0.001
+    Y_mutrate = 0.01
+end
 
-X = [1000]
-Y = [100]
-bX = [1.0]
-dX = [0.1]
-dY = [0.5]
-g = [1.0]
-k = [0.3]
-K = 0.3
-payoff = ones(1, 1)
-M = 1/0.00005
-p = 0.005
-m = 1.
-X_mutrate = 0.001
-Y_mutrate = 0.01
-
-model = CoevoPrPdModel(X, Y, bX, dX, dY, g, k ,K, payoff, M, p, m, X_mutrate, Y_mutrate, X_mutfunc, Y_mutfunc)
+model = CoevoPrPdModel(X, Y, bX, dX, dY, g, k ,K, m, payoff, M, p, X_mutrate, Y_mutrate, X_mutfunc, Y_mutfunc)
 
 X, Y, g, k = gillespie(model, 500)
+
+convertmodel = CoevoCompModel(model)
+
+X, g = gillespie(convertmodel, 100)

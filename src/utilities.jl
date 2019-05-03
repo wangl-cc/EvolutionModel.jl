@@ -44,6 +44,21 @@ end
 
 # sample end
 
+function promote_(as...)
+    T = Bool
+    for a in as
+        ta = typeof(a)
+        if ta <: Number
+            T = promote_type(T, ta)
+        elseif ta <: AbstractArray
+            T = promote_type(T, ta.parameters[1])
+        else
+            error("Unsupport type!")
+        end
+   end
+   return [T.(a) for a in as]
+end
+
 # macro
 
 """

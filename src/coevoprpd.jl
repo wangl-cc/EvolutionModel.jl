@@ -10,26 +10,26 @@ struct CoevoPrPdModel{I<:Integer, R<:Real, FA<:Function, FB<:Function} <: Abstra
     X::Vector{I}
     "sizes of predator populations"
     Y::Vector{I}
-    "birthrates of prey populations"
-    bX::Vector{R}
-    "deathrate of prey population"
-    dX::Vector{R}
-    "deathrate of prey populations"
-    dY::Vector{R}
-    "Growth-defense trade off parameter"
+    "baseline birthrate of prey populations"
+    bX::R
+    "baseline deathrate of prey population"
+    dX::R
+    "baseline deathrate of prey populations"
+    dY::R
+    "coefficients scaling prey growing ability"
     g::Vector{R}
     "ratio of predator growth to predation"
     k::Vector{R}
-    "the base k value"
+    "baseline k value"
     K::R
+    "growth-defense trade-off coefficient"
+    m::R
     "resource competition coefficient matrix of prey populations"
     payoff::Matrix{R}
     "coefficient scaling the intensity of competition"
     M::R
     "coefficient of the predation rate"
     p::R
-    "the growth-defense trade-off coefficient"
-    m::R
     "mutation rate of prey populations"
     X_mutrate::R
     "mutation rate of predator populations"
@@ -38,6 +38,33 @@ struct CoevoPrPdModel{I<:Integer, R<:Real, FA<:Function, FB<:Function} <: Abstra
     X_mutfunc::FA
     "a function descirbing how mutations change the pred population"
     Y_mutfunc::FB
+end
+
+function CoevoPrPdModel(X::AbstractVector{<:Integer},
+                        Y::AbstractVector{<:Integer},
+                        bX::Real,
+                        dX::Real,
+                        dY::Real,
+                        g::AbstractVector{<:Real},
+                        k::AbstractVector{<:Real},
+                        K::Real,
+                        m::Real,
+                        payoff::AbstractMatrix{<:Real},
+                        M::Real,
+                        p::Real,
+                        X_mutrate::Real,
+                        Y_mutrate::Real,
+                        X_mutfunc::Function,
+                        Y_mutfunc::Function)
+    return CoevoPrPdModel(promote(X, Y)...,
+    promote_(bX, dX, dY, g, k, K, m, payoff, M, p, X_mutrate, Y_mutrate)...,
+    X_mutfunc, Y_mutfunc)
+end
+
+function CoevoCompModel(model::CoevoPrPdModel)
+    @copyfields X, bX, dX, g, payoff, M, X_mutrate = model
+    X_mutfunc = model.X_mutfunc
+    return CoevoCompModel(X, bX, dX, g, payoff, M, X_mutrate, X_mutfunc)
 end
 
 function gillespie(model::CoevoPrPdModel{I, R, <:Function, <:Function}, T::Real)where {I<:Integer, R<:Real}
@@ -104,64 +131,55 @@ function gillespie(model::CoevoPrPdModel{I, R, <:Function, <:Function}, T::Real)
             newpop = Population(t, 1)
             push!(X_populations_current, newpop)
             push!(X_populations_all, newpop)
-            bX, dX, g, payoff = X_mutfunc(bX, dX, g, payoff, index)
+            g, payoff = X_mutfunc(g, payoff, index)
             push!(g_history, g[end])
         elseif i in (3, 4) # prey death (intrinsic and competition)
             index = index[1]
             death!(X_populations_current[index], t)
-            if X_populations_current[index].n == 0
+            if X_populations_current[index].n == 0 # check extinction
                 deleteat!(X_populations_current, index)
-                deleteat!(bX, index)
-                deleteat!(dX, index)
                 deleteat!(g, index)
                 payoff = payoff[1:size(payoff, 1) .!= index, 1:size(payoff, 2) .!= index]
             end
         elseif i == 5 # predator intrinsic death
             index = index[1]
             death!(Y_populations_current[index], t)
-            if Y_populations_current[index].n == 0
+            if Y_populations_current[index].n == 0 # check extinction
                 deleteat!(Y_populations_current, index)
-                deleteat!(dY, index)
                 deleteat!(k, index)
             end
         elseif i == 6 # predatation without birth
             # prey death
             index = index[2]
             death!(X_populations_current[index], t)
-            if X_populations_current[index].n == 0
+            if X_populations_current[index].n == 0 # check extinction
                 deleteat!(X_populations_current, index)
-                deleteat!(bX, index)
-                deleteat!(dX, index)
                 deleteat!(g, index)
                 payoff = payoff[1:size(payoff, 1) .!= index, 1:size(payoff, 2) .!= index]
             end
-        elseif i == 7 # predatation without birth no mutate
+        elseif i == 7 # predatation with birth no mutate
             # predator birth
             birth!(Y_populations_current[index[1]], t)
 
             # prey death
             death!(X_populations_current[index[2]], t)
-            if X_populations_current[index[2]].n == 0
+            if X_populations_current[index[2]].n == 0 # check extinction
                 deleteat!(X_populations_current, index[2])
-                deleteat!(bX, index[2])
-                deleteat!(dX, index[2])
                 deleteat!(g, index[2])
                 payoff = payoff[1:size(payoff, 1) .!= index[2], 1:size(payoff, 2) .!= index[2]]
             end
-        elseif  i == 8 # predatation without birth mutate
+        elseif  i == 8 # predatation with birth mutate
             # predator mutate
             newpop = Population(t, 1)
             push!(Y_populations_current, newpop)
             push!(Y_populations_all, newpop)
-            dY, k = Y_mutfunc(dY, k, index[1])
+            k = Y_mutfunc(k, index[1])
             push!(k_history, k[end])
 
             # prey death
             death!(X_populations_current[index[2]], t)
-            if X_populations_current[index[2]].n == 0
+            if X_populations_current[index[2]].n == 0 # check extinction
                 deleteat!(X_populations_current, index[2])
-                deleteat!(bX, index[2])
-                deleteat!(dX, index[2])
                 deleteat!(g, index[2])
                 payoff = payoff[1:size(payoff, 1) .!= index[2], 1:size(payoff, 2) .!= index[2]]
             end
