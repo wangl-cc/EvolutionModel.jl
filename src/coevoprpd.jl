@@ -102,8 +102,8 @@ function gillespie(model::CoevoPrPdModel{I, R, <:Function, <:Function}, T::Real)
 
         # calculate reactions
         ## prey
-        X_birth_nomut = @. bX * X_num * X_nomutrate
-        X_birth_mut = @. bX * X_num * X_mutrate
+        X_birth_nomut = @. bX * X_num * X_nomutrate * g
+        X_birth_mut = @. bX * X_num * X_mutrate * g
         X_intrinsic_death = @. dX * X_num
         X_competitiondeath = @. trans_X_num / payoff * X_num * repM
 
