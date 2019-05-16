@@ -13,6 +13,7 @@ coveralls: true
 branches:
   only:
   - master
+  - dev
 matrix:
   allow_failures:
   - julia: nightly
